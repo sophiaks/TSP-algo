@@ -6,6 +6,8 @@
 #include <math.h>
 #include <random>
 #include <iomanip>
+#include <chrono>
+
 
 using namespace std;
 struct city {
@@ -99,7 +101,7 @@ void random_search(vector<city> cities, int n_cities) {
         if (isPathShorter(best_tour, best_tour_inner)) best_tour = best_tour_inner;
         
         print_output_new(best_tour, calc_tour(best_tour));
-        
+
         // For some reason, tests work with different outputs (stderr with format > tour index1 index2 ...)
         print_err_output(best_tour, calc_tour(best_tour));
         }
@@ -110,5 +112,9 @@ int main(int argc, char *argv[]) {
     int n_cities;
     cin >> n_cities;
     vector<city> cities_vec = createVector(n_cities);
+
+    auto begin_random = std::chrono::high_resolution_clock::now();
     random_search(cities_vec, n_cities);
+    auto end_random = std::chrono::high_resolution_clock::now();
+    auto elapsed_random = std::chrono::duration_cast<std::chrono::nanoseconds>(end_random - begin_random);
 }
