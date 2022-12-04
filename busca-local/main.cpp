@@ -5,6 +5,7 @@
 #include <fstream>
 #include <math.h>
 #include <random>
+#include <iomanip>
 
 using namespace std;
 struct city {
@@ -13,6 +14,7 @@ struct city {
     double y;
 };
 
+// Creates a vector from stdin and number of cities
 vector<city> createVector(int n_cities) {
     vector<city> cities;
     for (int i = 0; i < n_cities; i++) {
@@ -36,115 +38,75 @@ void print_path(vector<city> cities) {
     cout << endl;
 }
 
+// Given a vector of cities, calculates the whole tour, from the first to the last item of the vector - returning to the initial point
 double calc_tour(vector<city> cities) {
     double tour;
-    for (int i = 0; i < (int) cities.size() - 1; i++) {
+    int last_index = ((int) cities.size()) - 1; 
+    for (int i = 0; i < last_index; i++) {
         tour += euclidean(cities[i], cities[i+1]);
     }
-    tour +=  euclidean(cities[0], cities[-1]);
+    // We have to return to the initial city
+    tour +=  euclidean(cities[last_index], cities[0]);
     return tour;
 }
 
-void print_output(vector<city> path, double tour) {
-    cout << tour << " ";
-    for (int i = 0; i < (int) path.size(); i++) {
-        cout << path[i].id << " ";
-    }
-    cout << endl;
+int isPathShorter(vector<city> path_prev, vector<city> path_current) {
+    if (calc_tour(path_current) < calc_tour(path_prev)) return 1;
+    else return 0;
 }
 
 void print_err_output(vector<city> path, double tour) {
     cerr << tour << " ";
-    for (int i = 0; i < (int) path.size(); i++) {
-        cerr << path[i].id << " ";
-    }
+    for (int i = 0; i < (int) path.size(); i++) cerr << path[i].id << " ";
     cerr << "\n";
 }
 
-
-void print_output_new(vector<city> path, double tour) {
-    cout << tour << " " << 0 << '\n';
-
-    for (int i = 0; i < (int) path.size(); i++) {
-        cout << path[i].id << " ";
-
-    }
+void print_test_err(vector<city> path, double tour) {
+    cerr << tour << " " << 0 << endl;
+    for (int i = 0; i < (int) path.size(); i++)  cout << path[i].id << " ";
     cout << endl;
 }
 
-void print_err_output_new(vector<city> path, double tour) {
-    cerr << tour << " " << 0 << '\n';
-
-    for (int i = 0; i < (int) path.size(); i++) {
-        cerr << path[i].id << " ";
-
-    }
-    cerr << endl;
+void print_output_new(vector<city> path, double tour) {
+    cout << tour << " " << 0 << '\n';
+    for (int i = 0; i < (int) path.size(); i++)  cout << path[i].id << " ";
+    cout << endl;
 }
 
 void random_search(vector<city> cities, int n_cities) {
-    // Setting seed as 10
-    std::default_random_engine rng(10);
+    std::default_random_engine rng(123);
+    // Copying setting the best_tour initially as the original vector of cities
     vector<city> best_tour = cities;
+
+    // Last index is size - 1 because we access index + 1 
+    int last_index = (int) cities.size() - 1;
+
     for (int i = 0; i < 10*n_cities; i++) {
+        vector<city> best_tour_inner = cities;
+        
         // Shuffling vector
         // From https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
-        std::shuffle(std::begin(cities), std::end(cities), rng);
+        std::shuffle(std::begin(best_tour_inner), std::end(best_tour_inner), rng);
 
-        for (int i = 0; i < (int) cities.size() - 1; i++) {
-            vector<city> original = cities;
-            vector<city> swapped = cities;
+        vector<city> swapped = best_tour_inner;
 
+        // Swapping vector items one by one
+        for (int i = 0; i < last_index; i++) {     
             swap(swapped[i], swapped[i+1]);
-
-            if (calc_tour(swapped) < calc_tour(best_tour)) {
-                //cout << "Dist swapped is " << calc_tour(swapped) << "; Last best dist is " << calc_tour(best_tour);
-                best_tour = swapped;
-            }
+            if (isPathShorter(best_tour_inner, swapped)) best_tour_inner = swapped;
         }
 
-        print_err_output(best_tour, calc_tour(best_tour));
+        if (isPathShorter(best_tour, best_tour_inner)) best_tour = best_tour_inner;
+        
         print_output_new(best_tour, calc_tour(best_tour));
         
+        // For some reason, tests work with different outputs (stderr with format > tour index1 index2 ...)
+        print_err_output(best_tour, calc_tour(best_tour));
         }
     }
-
-void n2_random_search(vector<city> cities, int n_cities) {
-    // Setting seed as 10
-    std::default_random_engine rng(10);
-    vector<city> best_tour = cities;
-    vector<city> not_swapped_outer = cities;
-
-    vector<city> untouched = cities; // Might be redundant
-    vector<city> best_tour_inner = cities;
-    vector<city> best_tour_outer = cities;
-    // First iteration, fixes one number
-    for (int j = 0; j < (int) cities.size(); j++) {
-        vector<city> not_swapped_inner = cities;
-        // Second iteration: swaps fixed number with next one
-        for (int k = 0; k < (int) cities.size() - 1; k++) {
-            // Swapping
-            swap(cities[j], cities[j+1]);
-            vector<city> swapped = cities;
-
-            // If swapped is better, changes best tour
-
-            if (calc_tour(swapped) < calc_tour(best_tour_inner)) {
-                best_tour_inner = swapped;
-            }
-
-        if (calc_tour(best_tour_inner) < calc_tour(best_tour_outer)) {
-            best_tour_outer = best_tour_inner;
-        }
-    }
-    //Printing output
-    print_err_output(best_tour_outer, calc_tour(best_tour_outer));
-    print_output_new(best_tour_outer, calc_tour(best_tour_outer));
-}
-}
-
 
 int main(int argc, char *argv[]) {
+    //std::cout << std::setprecision(2);
     int n_cities;
     cin >> n_cities;
     vector<city> cities_vec = createVector(n_cities);
