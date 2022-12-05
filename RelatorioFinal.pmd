@@ -1,4 +1,12 @@
-# Traveling Salesperson Problem (TSP)
+<h2> Insper - Instituto de Ensino e Pesquisa </h2>
+<br>
+<h2>Traveling Salesperson Problem (TSP)</h2>
+
+## Sophia Kerber Shigueoka
+
+### Dezembro de 2022 
+
+<div style="page-break-after: always;"></div>
 
 ## Introdução
 O problema do caixeiro viajante é baseado na seguinte pergunta: dada uma lista de cidades e a distância entre cada uma delas, qual a menor distância de modo que o caixeiro viajante visite todas as cidades e volte à cidade de origem?
@@ -23,14 +31,15 @@ Todos os algoritmos criados foram rodados localmente em uma máquina com as segu
 | Modelo CPU| Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz  |
 | CPUs | 12  |
 | Modelo GPU | TU116M [GeForce GTX 1660 Ti Mobile]|
-___
+
 
 E as seguintes especificações de software:
-|   |  | 
-|----|---------------|
-| OS | Pop!_OS 22.04 LTS  |
-| Versão do g++ | 11.3.0  |
-| Versão do OpenMP | 4.5  |
+
+|    |                   |   
+|----|-------------------|
+| OS | Pop!_OS 22.04 LTS |
+| Versão do g++ | 11.3.0 |
+| Versão do OpenMP | 4.5 |
 | Versão do CUDA | 11.5  |
 
 ## Heurística da cidade mais próxima
@@ -144,14 +153,14 @@ Para paralelizar o código, utilizou-se o OpenMP, um conjunto de extensões para
 ### Resultados - paralelismo multi-core
 <br> 
 
-![Figura 1](comparison_threads.png)
+![Comparação de tempo de execução com OpenMP](comparison_threads.png "Comparação de tempo de execução com OpenMP")
 
 Na Figura 1, temos a comparação de desempenho do código paralelizado com OpenMP do **Número de Threads** por **Tempo em Segundos**. Pode-se perceber, pelo gráfico, que o tempo de execução diminui ligeiramente conforme o número de threads aumenta. Percebe-se, ademais, que conforme o N aumenta - N sendo o número de cidades que devem ser visitadas - a diminuição do tempo de execução é mais drástica. 
 
 Abaixo, a tabela de resultados dos experimentos de threads e N que orginou a Figura 1.
 
 | N/Threads  | Sequencial |     2     |    4      |   6  | 8 | 12 | 20|
-|----|---------------|-----------|-----------|------|---|--|--|
+|----|---------------|-----------|-----------|------|-----|-----|-------|
 |  5 |0.00052s    |0.00030s |0.00023s| 0.00022s  |  0.00029s |0.0026s|0.0007s|0.00078s
 |  4 |   0.0005s      |0.00027s|0.00028s|  0.00036s | 0.00031s  |0.0063s|0.0007s|0.00096s
 | 15 |0.00597s     | 0.00291s |0.0018s | 0.0016s  | 0.0016s  |0.0045s|0.0016s|0.00160s
@@ -164,8 +173,7 @@ Abaixo, a tabela de resultados dos experimentos de threads e N que orginou a Fig
 
 A Figura 2 mostra com mais clareza esta diminuição. Neste caso, mostra-se o Speedup, ou seja, quantas vezes mais rápida é a execução em comparação ao algoritmo sequencial. Nota-se que, até 20 cidades, o Speedup não é condizente com a lógica de multi-core, de modo que a impressão passada é que o algoritmo não é eficiente para um N pequeno. A partir de 20 cidades, porém, percebe-se um Speedup muito mais significante - chegando a 7.
 
-![Figura 2](comparison_speedup.png)
-___
+![Comparação de Speedup com OpenMP](comparison_speedup.png "Comparação de Speedup com OpenMP")
 
 <br>
 
@@ -181,10 +189,11 @@ ___
 A busca exaustiva, também chamada de abordagem brute-force, calcula **todas** os caminhos possíveis, compara, e escolhe o melhor resultado. 
 Neste algoritmo, é utilizada uma abordagem recursiva, de acordo com o seguinte diagrama:
 
-![](recursion_exaustive.png)
+![Ilustração da recursão da busca exaustiva](recursion_exaustive.png)
 
 
 Para mais detalhes observe o arquivo em C++ da [busca exaustiva](busca-exaustiva/main.cpp).
+
 ___
 
 <br> 
@@ -215,4 +224,5 @@ Quando aumentamos o tamanho do problema, adicionando mais cidades, entramos na l
 Ele propõe que aumentando N para máquinas multi-core pode manter a escalabilidade quando se trata de número de processadores. Ele diz, portanto, que é eficiente paralelizar o código com uma máquina multi-core poderosa apenas quando o dataset é grande.
 
 Assim, tratando-se da GPU, é eficiente investir nesse tipo de hardware para aplicações paralelizadas quando temos grandes volumes de dados.
+
 ___
