@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <tuple>
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -68,9 +67,9 @@ void print_output_new(vector<city> path, double tour) {
     cout << endl;
 }
 
-vector<city> exaustive_search(vector<city> cities_not_visited, vector<city> path, vector<city> all_cities, int &n_leaf)
+vector<city> exaustive_search(vector<city> cities_not_visited, vector<city> path, int &n_leaf)
 {
-
+    cout << "Called exaustive search" << endl;
     // EXIT CONDITION FOR RECURSION
     if (!cities_not_visited.size()) {
         return path;
@@ -78,23 +77,26 @@ vector<city> exaustive_search(vector<city> cities_not_visited, vector<city> path
 
     // --- CREATING ALL POSSIBLE PATHS ---- //
 
-    // Vector of possible paths (vector of vectors)
+    // Vector of all possible paths (vector of vectors)
     vector<vector<city>> possibilities(cities_not_visited.size());
 
     // While we still have cities to visit
     for (int i = 0; i < (int) cities_not_visited.size(); i++) {
-        // Adding city to path
-        vector<city> perm = path;
+        // Adding city to path (path begins as an empty vector)
+        vector<city> permutation = path;
         // Since i starts from 0, we are starting from cities[0] -> id = 0
-        perm.push_back(cities_not_visited[i]);
+        permutation.push_back(cities_not_visited[i]);
 
         // Making a copy of cities and removing the one we already visited
         vector<city> updated_not_visited = cities_not_visited;
         remove_city(updated_not_visited, i);
 
         // Calling function again with new path and new list of not visited cities
-        // possibilities[i] = exaustive_search(updated_not_visited, perm);
-        possibilities[i] = exaustive_search(updated_not_visited, perm, all_cities, n_leaf);
+        for (int i = 0; i < (int) cities_not_visited.size(); i++) {
+            exaustive_search(updated_not_visited, permutation, n_leaf);
+        }
+        possibilities.push_back(exaustive_search(updated_not_visited, permutation, n_leaf));
+        print_path(possibilities[i]);
     }
 
 
@@ -127,9 +129,15 @@ int main(int argc, char *argv[]) {
     cin >> n_cities;
     vector<city> cities_vec = createVector(n_cities);
     int n_leaf = 0;
-    // Creating empty vector to create paths on recursion
+    // Creating empty vector to create paths with recursion
     vector<city> empty_vec;
-    vector<city>  best_path = exaustive_search(cities_vec, empty_vec, cities_vec, n_leaf);
+    #ifdef _OPENMP
+        // código específico para multi-core aqui
+    #else
+        // código específico para sequencia aqui
+    #endif 
+
+    vector<city>  best_path = exaustive_search(cities_vec, empty_vec, n_leaf);
     cerr << "num_leaf " << n_leaf << endl;
     print_output_new(best_path, calc_tour(best_path));
 }

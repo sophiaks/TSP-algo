@@ -7,6 +7,7 @@
 #include <random>
 #include <iomanip>
 #include <chrono>
+#include <omp.h>
 
 using namespace std;
 struct city {
@@ -74,15 +75,19 @@ void print_output_new(vector<city> path, double tour) {
     cout << endl;
 }
 
-void sequential_random_search(vector<city> cities, int n_cities) {
-    std::default_random_engine rng(10);
+void parallel_random_search(vector<city> cities, int n_cities) {
+    std::default_random_engine rng(123);
     // Copying setting the best_tour initially as the original vector of cities
     vector<city> best_tour = cities;
 
     // Last index is size - 1 because we access index + 1 
     int last_index = (int) cities.size() - 1;
 
-    for (int i = 0; i < 10*n_cities; i++) {
+    #pragma omp parallel num_threads(20)
+    {   
+        cout << "We are " << omp_get_num_threads();
+        #pragma omp for
+        for (int i = 0; i < 10*n_cities; i++) {
         vector<city> best_tour_inner = cities;
         
         // Shuffling vector
@@ -91,7 +96,6 @@ void sequential_random_search(vector<city> cities, int n_cities) {
 
         vector<city> swapped = best_tour_inner;
 
-        // Swapping vector items one by one
         for (int i = 0; i < last_index; i++) {     
             swap(swapped[i], swapped[i+1]);
             if (isPathShorter(best_tour_inner, swapped)) best_tour_inner = swapped;
@@ -102,8 +106,9 @@ void sequential_random_search(vector<city> cities, int n_cities) {
         //print_output_new(best_tour, calc_tour(best_tour));
 
         // For some reason, tests work with different outputs (stderr with format > tour index1 index2 ...)
-        //print_err_output(best_tour, calc_tour(best_tour));
+        //rint_err_output(best_tour, calc_tour(best_tour));
         }
+    }
     }
 
 int main(int argc, char *argv[]) {
@@ -111,10 +116,9 @@ int main(int argc, char *argv[]) {
     int n_cities;
     cin >> n_cities;
     vector<city> cities_vec = createVector(n_cities);
-    
     auto begin_random = std::chrono::high_resolution_clock::now();
-    sequential_random_search(cities_vec, n_cities);
+    parallel_random_search(cities_vec, n_cities);
     auto end_random = std::chrono::high_resolution_clock::now();
     auto elapsed_random = std::chrono::duration_cast<std::chrono::nanoseconds>(end_random - begin_random);
-    cout << "Sequential time: " << elapsed_random.count() * 1e-9 << endl;   
+    cout << "Parallel time: " << elapsed_random.count() * 1e-9 << endl;
 }
